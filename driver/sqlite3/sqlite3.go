@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"github.com/mattes/migrate/driver"
 	"github.com/mattes/migrate/file"
 	"github.com/mattes/migrate/migrate/direction"
 	"github.com/mattn/go-sqlite3"
@@ -13,6 +14,10 @@ import (
 
 type Driver struct {
 	db *sql.DB
+}
+
+func init() {
+	driver.Register("sqlite3", &Driver{})
 }
 
 const tableName = "schema_migration"

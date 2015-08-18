@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/go-sql-driver/mysql"
+	"github.com/mattes/migrate/driver"
 	"github.com/mattes/migrate/file"
 	"github.com/mattes/migrate/migrate/direction"
 	"regexp"
@@ -17,6 +18,10 @@ import (
 
 type Driver struct {
 	db *sql.DB
+}
+
+func init() {
+	driver.Register("mysql", &Driver{})
 }
 
 const tableName = "schema_migrations"

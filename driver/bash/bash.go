@@ -2,11 +2,16 @@
 package bash
 
 import (
+	"github.com/mattes/migrate/driver"
 	"github.com/mattes/migrate/file"
 	_ "github.com/mattes/migrate/migrate/direction"
 )
 
 type Driver struct {
+}
+
+func init() {
+	driver.Register("bash", &Driver{})
 }
 
 func (driver *Driver) Initialize(url string) error {

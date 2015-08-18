@@ -4,6 +4,7 @@ package cassandra
 import (
 	"fmt"
 	"github.com/gocql/gocql"
+	"github.com/mattes/migrate/driver"
 	"github.com/mattes/migrate/file"
 	"github.com/mattes/migrate/migrate/direction"
 	"net/url"
@@ -13,6 +14,10 @@ import (
 
 type Driver struct {
 	session *gocql.Session
+}
+
+func init() {
+	driver.Register("cassandra", &Driver{})
 }
 
 const (

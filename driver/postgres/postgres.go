@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/lib/pq"
+	"github.com/mattes/migrate/driver"
 	"github.com/mattes/migrate/file"
 	"github.com/mattes/migrate/migrate/direction"
 	"strconv"
@@ -13,6 +14,10 @@ import (
 
 type Driver struct {
 	db *sql.DB
+}
+
+func init() {
+	driver.Register("postgres", &Driver{})
 }
 
 const tableName = "schema_migrations"

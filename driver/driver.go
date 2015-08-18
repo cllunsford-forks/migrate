@@ -6,11 +6,6 @@ import (
 	"fmt"
 	neturl "net/url" // alias to allow `url string` func signature in New
 
-	"github.com/mattes/migrate/driver/bash"
-	"github.com/mattes/migrate/driver/cassandra"
-	"github.com/mattes/migrate/driver/mysql"
-	"github.com/mattes/migrate/driver/postgres"
-	"github.com/mattes/migrate/driver/sqlite3"
 	"github.com/mattes/migrate/file"
 )
 
@@ -40,6 +35,22 @@ type Driver interface {
 	Version() (uint64, error)
 }
 
+var drivers = make(map[string]Driver)
+
+func Register(name string, driver Driver) {
+	if driver == nil {
+		panic("Register driver is nil")
+	}
+	if _, dup := drivers[name]; dup {
+		panic("Register called twice for driver " + name)
+	}
+	drivers[name] = driver
+}
+
+func unregisterAllDrivers() {
+	drivers = make(map[string]Driver)
+}
+
 // New returns Driver and calls Initialize on it
 func New(url string) (Driver, error) {
 	u, err := neturl.Parse(url)
@@ -47,46 +58,13 @@ func New(url string) (Driver, error) {
 		return nil, err
 	}
 
-	switch u.Scheme {
-	case "postgres":
-		d := &postgres.Driver{}
-		verifyFilenameExtension("postgres", d)
+	if d, ok := drivers[u.Scheme]; ok {
+		verifyFilenameExtension(u.Scheme, d)
 		if err := d.Initialize(url); err != nil {
 			return nil, err
 		}
 		return d, nil
-
-	case "mysql":
-		d := &mysql.Driver{}
-		verifyFilenameExtension("mysql", d)
-		if err := d.Initialize(url); err != nil {
-			return nil, err
-		}
-		return d, nil
-
-	case "bash":
-		d := &bash.Driver{}
-		verifyFilenameExtension("bash", d)
-		if err := d.Initialize(url); err != nil {
-			return nil, err
-		}
-		return d, nil
-
-	case "cassandra":
-		d := &cassandra.Driver{}
-		verifyFilenameExtension("cassanda", d)
-		if err := d.Initialize(url); err != nil {
-			return nil, err
-		}
-		return d, nil
-	case "sqlite3":
-		d := &sqlite3.Driver{}
-		verifyFilenameExtension("sqlite3", d)
-		if err := d.Initialize(url); err != nil {
-			return nil, err
-		}
-		return d, nil
-	default:
+	} else {
 		return nil, errors.New(fmt.Sprintf("Driver '%s' not found.", u.Scheme))
 	}
 }
